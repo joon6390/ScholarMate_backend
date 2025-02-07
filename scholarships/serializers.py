@@ -4,4 +4,4 @@ from .models import Scholarship
 class ScholarshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scholarship
-        fields = "__all__"
+        fields = '__all__'

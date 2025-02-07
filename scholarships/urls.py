@@ -1,10 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ScholarshipViewSet
-
-router = DefaultRouter()
-router.register(r"scholarships", ScholarshipViewSet)
+from django.urls import path
+from .views import ScholarshipListView
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("api/scholarships/", ScholarshipListView.as_view(), name="scholarship-list"),
 ]
