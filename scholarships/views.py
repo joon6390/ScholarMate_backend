@@ -2,11 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import requests
+from rest_framework.permissions import AllowAny
 
 API_URL = "https://api.odcloud.kr/api/15028252/v1/uddi:ccd5ddd5-754a-4eb8-90f0-cb9bce54870b"
 SERVICE_KEY = "N3h6qI7uUS8%2Bx3DAbN4CZbI%2Bhmhfg1HUIkzbzMAo4ixWMJ9sOsKwmTB3y1nekc4U%2BIRhKu5vFmagRGznVT8mOw%3D%3D"
 
 class ScholarshipListView(APIView):
+    permission_classes = [AllowAny]  # ✅ 인증 없이 접근 가능
     def get(self, request):
         page = int(request.query_params.get("page", 1))  # 현재 페이지
         per_page = int(request.query_params.get("perPage", 10))  # 페이지당 데이터 수
