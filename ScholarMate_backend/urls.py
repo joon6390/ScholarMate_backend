@@ -6,5 +6,5 @@ urlpatterns = [
     path("auth/", include("djoser.urls.jwt")),  # JWT 로그인, 로그아웃
     path('admin/', admin.site.urls),
     path('scholarships/', include('scholarships.urls')),
-    path('api/', include('myinfor.urls')), 
+    path('userinfor/', include('userinfor.urls')), 
 ]

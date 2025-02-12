@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'djoser',
     'corsheaders',
     'django_filters',
-    'myinfor',
+    'userinfor',
 ]
 
 REST_FRAMEWORK = {
