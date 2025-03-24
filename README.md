@@ -3,7 +3,7 @@
 ScholarMate는 AI 기반 개인 맞춤형 장학금 추천 서비스입니다.  
 이 저장소는 ScholarMate의 **백엔드 (Django + MySQL)** 프로젝트를 포함하고 있습니다.
 
-## 개발환경 
+## ⚙️ 개발 환경 
 
 - **OS**: Ubuntu 24.04.2 LTS
 - **Programming Language**: Python 3.12.3
