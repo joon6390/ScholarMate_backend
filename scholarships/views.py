@@ -10,6 +10,7 @@ from .serializers import WishlistSerializer
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from rest_framework.decorators import api_view, permission_classes
+from .serializers import CalendarScholarshipSerializer
 
 API_URL = "https://api.odcloud.kr/api/15028252/v1/uddi:ccd5ddd5-754a-4eb8-90f0-cb9bce54870b"
 SERVICE_KEY = "N3h6qI7uUS8%2Bx3DAbN4CZbI%2Bhmhfg1HUIkzbzMAo4ixWMJ9sOsKwmTB3y1nekc4U%2BIRhKu5vFmagRGznVT8mOw%3D%3D"
@@ -150,4 +151,12 @@ def remove_from_wishlist(request, pk):
         return Response({"status": "deleted"}, status=200)
     except Wishlist.DoesNotExist:
         return Response({"error": "해당 장학금이 관심 목록에 없습니다."}, status=404)
+    
+class MyCalendarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        wishlisted = Wishlist.objects.filter(user=request.user)
+        serializer = CalendarScholarshipSerializer(wishlisted, many=True)
+        return Response(serializer.data)
     
