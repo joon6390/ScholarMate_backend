@@ -4,6 +4,12 @@ from rest_framework import status
 import requests
 from rest_framework.permissions import AllowAny
 from datetime import datetime
+from rest_framework.permissions import IsAuthenticated
+from .models import Scholarship, Wishlist
+from .serializers import WishlistSerializer
+from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_date
+from rest_framework.decorators import api_view, permission_classes
 
 API_URL = "https://api.odcloud.kr/api/15028252/v1/uddi:ccd5ddd5-754a-4eb8-90f0-cb9bce54870b"
 SERVICE_KEY = "N3h6qI7uUS8%2Bx3DAbN4CZbI%2Bhmhfg1HUIkzbzMAo4ixWMJ9sOsKwmTB3y1nekc4U%2BIRhKu5vFmagRGznVT8mOw%3D%3D"
@@ -66,3 +72,82 @@ class ScholarshipListView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+class ToggleWishlistAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        action = request.data.get("action")
+        product_id = request.data.get("product_id")
+
+        if action == "remove" and product_id:
+            scholarship = get_object_or_404(Scholarship, product_id=product_id)
+            Wishlist.objects.filter(user=request.user, scholarship=scholarship).delete()
+            return Response({"status": "removed"})
+
+        scholarship_id = request.data.get("scholarship_id")
+        if not scholarship_id:
+            return Response({"error": "scholarship_id 필요"}, status=400)
+
+        scholarship = get_object_or_404(Scholarship, id=scholarship_id)
+        wishlist, created = Wishlist.objects.get_or_create(user=request.user, scholarship=scholarship)
+        if not created:
+            wishlist.delete()
+            return Response({"status": "removed"})
+        return Response({"status": "added"})
+
+class UserWishlistAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-added_at')
+        serializer = WishlistSerializer(wishlist_items, many=True)
+        return Response(serializer.data)
+
+class AddToWishlistFromAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        name = data.get("상품명")
+        foundation = data.get("운영기관명")
+        product_id = f"{name}_{foundation}"
+
+        scholarship, _ = Scholarship.objects.get_or_create(
+            product_id=product_id,
+            defaults={
+                "name": name,
+                "foundation_name": foundation,
+                "recruitment_start": parse_date(data.get("모집시작일")),
+                "recruitment_end": parse_date(data.get("모집종료일")),
+                "university_type": data.get("대학구분", ""),
+                "product_type": data.get("학자금유형구분", ""),
+                "grade_criteria_details": data.get("성적기준 상세내용", ""),
+                "income_criteria_details": data.get("소득기준 상세내용", ""),
+                "support_details": data.get("지원내역 상세내용", ""),
+                "specific_qualification_details": data.get("특정자격 상세내용", ""),
+                "residency_requirement_details": data.get("지역거주여부 상세내용", ""),
+                "selection_method_details": data.get("선발방법 상세내용", ""),
+                "number_of_recipients_details": data.get("선발인원 상세내용", ""),
+                "eligibility_restrictions": data.get("자격제한 상세내용", ""),
+                "required_documents_details": data.get("제출서류 상세내용", ""),
+                "recommendation_required": data.get("추천필요여부 상세내용", "") == "필요",
+                "major_field_type": data.get("계열구분", ""),
+                "academic_year_type": data.get("학년구분", ""),
+                "managing_organization_type": data.get("운영기관구분", ""),
+            }
+        )
+
+        wishlist, created = Wishlist.objects.get_or_create(user=request.user, scholarship=scholarship)
+        return Response({"status": "added" if created else "exists"})
+    
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def remove_from_wishlist(request, pk):
+    try:
+        wishlist = Wishlist.objects.get(user=request.user, scholarship__id=pk)
+        wishlist.delete()
+        return Response({"status": "deleted"}, status=200)
+    except Wishlist.DoesNotExist:
+        return Response({"error": "해당 장학금이 관심 목록에 없습니다."}, status=404)
+    

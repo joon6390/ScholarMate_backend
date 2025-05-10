@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Scholarship(models.Model):
     university_type = models.CharField(max_length=100)  # 대학 유형
@@ -24,3 +25,14 @@ class Scholarship(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    scholarship = models.ForeignKey(Scholarship, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'scholarship')
+
+    def __str__(self):
+        return f"{self.user.username} → {self.scholarship.name}"
