@@ -16,8 +16,8 @@ class WishlistSerializer(serializers.ModelSerializer):
 class CalendarScholarshipSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='scholarship.name')
     deadline = serializers.DateField(source='scholarship.recruitment_end')
-    documents = serializers.CharField(source='scholarship.required_documents_details')
+    required_documents_details = serializers.CharField(source='scholarship.required_documents_details')
 
     class Meta:
         model = Wishlist
-        fields = ['id', 'title', 'deadline', 'documents']
+        fields = ['id', 'title', 'deadline', 'required_documents_details']

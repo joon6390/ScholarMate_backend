@@ -56,8 +56,16 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
+from datetime import timedelta
+
 SIMPLE_JWT = {
-    "AUTH_HEADER_TYPES": ("Bearer", "JWT"),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),      # ✅ Access Token: 24시간 유지
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),       # ✅ Refresh Token: 7일 유지
+    "ROTATE_REFRESH_TOKENS": True,                     # ✅ Access 재발급 시 Refresh도 새로 발급
+    "BLACKLIST_AFTER_ROTATION": True,                  # ✅ 이전 Refresh Token은 무효화
+    "AUTH_HEADER_TYPES": ("Bearer", "JWT"),            # ✅ 헤더 타입 설정
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "ALGORITHM": "HS256",
 }
 
 DJOSER = {
